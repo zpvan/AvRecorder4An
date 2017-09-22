@@ -122,4 +122,11 @@ public class MainActivity extends AppCompatActivity implements DevicesSearcher.I
             }
         }
     }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (mSearcher != null)
+            mSearcher.release();
+    }
 }

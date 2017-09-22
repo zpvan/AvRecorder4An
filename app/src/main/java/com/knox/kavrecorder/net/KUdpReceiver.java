@@ -75,4 +75,9 @@ public class KUdpReceiver {
             }
         }
     }
+
+    public void release() {
+        if (mSocket != null)
+            mSocket.close();
+    }
 }

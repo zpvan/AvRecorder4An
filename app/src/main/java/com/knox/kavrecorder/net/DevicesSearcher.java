@@ -49,6 +49,7 @@ public class DevicesSearcher implements KUdpReceiver.IReceiver {
     }
 
     public void search() {
+        //TODO Fix: always create one new thread everytime be called func search
         new AsyncTask(this).start();
     }
 
@@ -56,6 +57,7 @@ public class DevicesSearcher implements KUdpReceiver.IReceiver {
         private WeakReference<DevicesSearcher> mSearcher;
 
         public AsyncTask(DevicesSearcher searcher) {
+            super("DevSea");
             mSearcher = new WeakReference<DevicesSearcher>(searcher);
         }
 
@@ -115,5 +117,13 @@ public class DevicesSearcher implements KUdpReceiver.IReceiver {
 
     public interface IDevicesSearch {
         void onReceive(SearchReply reply);
+    }
+
+    public void release() {
+        if (mKUdpReceiver != null)
+            mKUdpReceiver.release();
+
+        if (mKUdpSender != null)
+            mKUdpSender.release();
     }
 }
