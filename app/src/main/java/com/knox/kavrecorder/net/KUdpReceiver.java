@@ -3,6 +3,7 @@ package com.knox.kavrecorder.net;
 import android.util.Log;
 
 import java.io.IOException;
+import java.io.InterruptedIOException;
 import java.lang.ref.WeakReference;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -22,6 +23,7 @@ public class KUdpReceiver {
 
     private DatagramSocket mSocket;
     private IReceiver mListener;
+    private AsyncTask mRecieveThread = null;
 
     public KUdpReceiver(int port) {
         if (port == 0)
@@ -45,7 +47,8 @@ public class KUdpReceiver {
     }
 
     public void AsyncReceive() {
-        new AsyncTask(this).start();
+        mRecieveThread = new AsyncTask(this);
+        mRecieveThread.start();
     }
 
     private static class AsyncTask extends Thread {
@@ -59,7 +62,7 @@ public class KUdpReceiver {
         @Override
         public void run() {
             /*接收数据*/
-            while (true) {
+            while (!interrupted()) {
                 byte[] buff = new byte[1024];
                 DatagramPacket packet = new DatagramPacket(buff, 1024);
                 try {
@@ -69,6 +72,9 @@ public class KUdpReceiver {
                     if (mReceiver.get().mListener != null && packet.getAddress() != null) {
                         mReceiver.get().mListener.onReceive(packet.getData(), packet.getAddress().getHostAddress());
                     }
+                } catch (InterruptedIOException e) {
+                    e.printStackTrace();
+                    break;
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -77,6 +83,11 @@ public class KUdpReceiver {
     }
 
     public void release() {
+        if (mRecieveThread != null) {
+            mRecieveThread.interrupt();
+            mRecieveThread = null;
+        }
+
         if (mSocket != null)
             mSocket.close();
     }
