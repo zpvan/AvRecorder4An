@@ -25,7 +25,10 @@ public abstract class KRvAdapter<T> extends RecyclerView.Adapter<KRvViewHolder> 
         notifyDataSetChanged();
     }
 
-    public void addData(T data) {
+    public void addData(T data, boolean needClear) {
+        if (needClear)
+            mList.clear();
+
         mList.add(data);
         notifyDataSetChanged();
     }

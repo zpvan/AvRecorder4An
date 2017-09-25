@@ -52,6 +52,7 @@ public class MainActivity extends AppCompatActivity implements DevicesSearcher.I
     private KHandler mKHandler = new KHandler(this);
     private static final int RECEIVEBEAN = 0x101;
     private DeviceRvAdapter mDeviceRvAdapter;
+    private boolean needClear = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -95,6 +96,7 @@ public class MainActivity extends AppCompatActivity implements DevicesSearcher.I
     }
 
     private void searchDevices() {
+        needClear = true;
         mSearcher.search();
     }
 
@@ -116,8 +118,10 @@ public class MainActivity extends AppCompatActivity implements DevicesSearcher.I
             MainActivity activity = (MainActivity) reference.get();
             switch (msg.what) {
                 case RECEIVEBEAN:
-                    if (activity != null)
-                        activity.mDeviceRvAdapter.addData((SearchReply) msg.obj);
+                    if (activity != null) {
+                        activity.mDeviceRvAdapter.addData((SearchReply) msg.obj, activity.needClear);
+                        activity.needClear = false;
+                    }
                     break;
             }
         }
