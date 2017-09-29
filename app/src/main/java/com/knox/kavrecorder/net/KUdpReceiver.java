@@ -24,6 +24,7 @@ public class KUdpReceiver {
     private DatagramSocket mSocket;
     private IReceiver mListener;
     private AsyncTask mRecieveThread = null;
+    private static final int BUF_SIZE = 1024;
 
     public KUdpReceiver(int port) {
         if (port == 0)
@@ -63,8 +64,8 @@ public class KUdpReceiver {
         public void run() {
             /*接收数据*/
             while (!interrupted()) {
-                byte[] buff = new byte[1024];
-                DatagramPacket packet = new DatagramPacket(buff, 1024);
+                byte[] buff = new byte[BUF_SIZE];
+                DatagramPacket packet = new DatagramPacket(buff, BUF_SIZE);
                 try {
                     if (mReceiver.get().mSocket != null)
                         mReceiver.get().mSocket.receive(packet);

@@ -4,7 +4,7 @@ import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
 import com.knox.kavrecorder.R;
-import com.knox.kavrecorder.bean.SearchReply;
+import com.knox.kavrecorder.bean.SearchRlyBean;
 
 
 /**
@@ -14,10 +14,10 @@ import com.knox.kavrecorder.bean.SearchReply;
  */
 
 
-public class DeviceRvAdapter extends KRvAdapter<SearchReply> {
+public class DevRvAdapter extends KRvAdapter<SearchRlyBean> {
 
     @Override
-    public void onBindViewHolder2(KRvViewHolder holder, int position, SearchReply searchReply) {
+    public void onBindViewHolder2(KRvViewHolder holder, int position, SearchRlyBean searchReply) {
         holder.setText(R.id.tv_name, searchReply.deviceName);
     }
 

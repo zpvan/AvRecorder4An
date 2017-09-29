@@ -7,20 +7,20 @@ package com.knox.kavrecorder.bean;
  */
 
 
-public class SearchQuery {
+public class SearchQryBean {
     public int deviceType;
     public int deviceFunction;
 
-    public SearchQuery() {}
+    public SearchQryBean() {}
 
-    public SearchQuery(int deviceType, int deviceFunction) {
+    public SearchQryBean(int deviceType, int deviceFunction) {
         this.deviceType = deviceType;
         this.deviceFunction = deviceFunction;
     }
 
     @Override
     public String toString() {
-        return "SearchQuery{" +
+        return "SearchQryBean{" +
                 "deviceType=" + deviceType +
                 ", deviceFunction=" + deviceFunction +
                 '}';

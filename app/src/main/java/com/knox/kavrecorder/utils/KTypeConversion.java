@@ -12,7 +12,7 @@ public class KTypeConversion {
         int temp = value;
         byte[] bs = new byte[4];
         for (int i = 0; i < bs.length; i++) {
-            bs[i] = new Integer(temp & 0xff).byteValue();//将最低位保存在最低位
+            bs[i] = new Integer(temp & 0xFF).byteValue();//将最低位保存在最低位
             temp = temp >> 8; // 向右移8位
         }
         return bs;
@@ -22,7 +22,7 @@ public class KTypeConversion {
         int temp = value;
         byte[] bs = new byte[4];
         for (int i = 0; i < bs.length; i++) {
-            bs[bs.length - 1 - i] = new Integer(temp & 0xff).byteValue();//将最低位保存在最高位
+            bs[bs.length - 1 - i] = new Integer(temp & 0xFF).byteValue();//将最低位保存在最高位
             temp = temp >> 8; // 向右移8位
         }
         return bs;

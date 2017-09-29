@@ -7,21 +7,21 @@ package com.knox.kavrecorder.bean;
  */
 
 
-public class SearchReply {
+public class SearchRlyBean {
 
-    private static final String TAG = "SearchReply";
+    private static final String TAG = "SearchRlyBean";
 
-    public int deviceType;      //byte[4]
-    public int deviceFunction;  //byte[4]
-    public String deviceStatus; //byte[32]
-    public String deviceName;   //byte[64]
-    public String deviceAlias;  //byte[64]
-    public String reserved;     //byte[128]
+    public int deviceType;      // byte[4]
+    public int deviceFunction;  // byte[4]
+    public String deviceStatus; // byte[32]
+    public String deviceName;   // byte[64]
+    public String deviceAlias;  // byte[64]
+    public String reserved;     // byte[128]
     public String serverIp;
 
     @Override
     public String toString() {
-        return "SearchReply{" +
+        return "SearchRlyBean{" +
                 "deviceType=" + deviceType +
                 ", deviceFunction=" + deviceFunction +
                 ", deviceStatus='" + deviceStatus + '\'' +

@@ -2,8 +2,8 @@ package com.knox.kavrecorder.net;
 
 import android.util.Log;
 
-import com.knox.kavrecorder.bean.SearchQuery;
-import com.knox.kavrecorder.bean.SearchReply;
+import com.knox.kavrecorder.bean.SearchQryBean;
+import com.knox.kavrecorder.bean.SearchRlyBean;
 
 import java.lang.ref.WeakReference;
 import java.util.Arrays;
@@ -20,9 +20,9 @@ import static com.knox.kavrecorder.utils.KTypeConversion.leBytes2Int;
  */
 
 
-public class DevicesSearcher implements KUdpReceiver.IReceiver {
+public class DevSearcher implements KUdpReceiver.IReceiver {
 
-    private static final String TAG = "DevicesSearcher";
+    private static final String TAG = "DevSearcher";
 
     private String mSendIp;
     private int mSendPort;
@@ -32,7 +32,7 @@ public class DevicesSearcher implements KUdpReceiver.IReceiver {
     private IDevicesSearch mListener;
 
 
-    public DevicesSearcher(String ip, int sendPort, int receivePort) {
+    public DevSearcher(String ip, int sendPort, int receivePort) {
 
         if (ip == null || sendPort == 0 || receivePort == 0)
             return;
@@ -54,21 +54,21 @@ public class DevicesSearcher implements KUdpReceiver.IReceiver {
     }
 
     static class AsyncTask extends Thread {
-        private WeakReference<DevicesSearcher> mSearcher;
+        private WeakReference<DevSearcher> mSearcher;
 
-        public AsyncTask(DevicesSearcher searcher) {
+        public AsyncTask(DevSearcher searcher) {
             super("DevSea");
-            mSearcher = new WeakReference<DevicesSearcher>(searcher);
+            mSearcher = new WeakReference<DevSearcher>(searcher);
         }
 
         @Override
         public void run() {
             if (mSearcher.get().mKUdpSender != null)
-                mSearcher.get().mKUdpSender.send(mSearcher.get().parseQuery(new SearchQuery(5, 0)));
+                mSearcher.get().mKUdpSender.send(mSearcher.get().parseQuery(new SearchQryBean(5, 0)));
         }
     }
 
-    private byte[] parseQuery(SearchQuery queryBean) {
+    private byte[] parseQuery(SearchQryBean queryBean) {
         byte[] data = new byte[8];
         int validSize = 0;
 
@@ -90,14 +90,14 @@ public class DevicesSearcher implements KUdpReceiver.IReceiver {
     @Override
     public void onReceive(byte[] datas, String serverIp) {
         /*接收到各个设备返回的信息, 解析成bean*/
-        SearchReply reply = packReply(datas);
+        SearchRlyBean reply = packReply(datas);
         reply.serverIp = serverIp;
         if (mListener != null)
             mListener.onReceive(reply);
     }
 
-    private SearchReply packReply(byte[] datas) {
-        SearchReply reply = new SearchReply();
+    private SearchRlyBean packReply(byte[] datas) {
+        SearchRlyBean reply = new SearchRlyBean();
 
         int readPos = 0;
         reply.deviceType = leBytes2Int(datas, readPos);
@@ -116,7 +116,7 @@ public class DevicesSearcher implements KUdpReceiver.IReceiver {
     }
 
     public interface IDevicesSearch {
-        void onReceive(SearchReply reply);
+        void onReceive(SearchRlyBean reply);
     }
 
     public void release() {

@@ -12,22 +12,19 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-
-import com.knox.kavrecorder.adapter.DeviceRvAdapter;
-import com.knox.kavrecorder.bean.SearchReply;
-import com.knox.kavrecorder.net.DevicesSearcher;
-
+import com.knox.kavrecorder.adapter.DevRvAdapter;
+import com.knox.kavrecorder.bean.SearchRlyBean;
+import com.knox.kavrecorder.net.DevSearcher;
 import java.lang.ref.WeakReference;
-
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
-import static com.knox.kavrecorder.constant.NetInfo.listenPort;
-import static com.knox.kavrecorder.constant.NetInfo.searchIp;
-import static com.knox.kavrecorder.constant.NetInfo.searchPort;
+import static com.knox.kavrecorder.constant.NetInfo.LISTEN_PORT;
+import static com.knox.kavrecorder.constant.NetInfo.SEARCH_IP;
+import static com.knox.kavrecorder.constant.NetInfo.SEARCH_PORT;
 
-public class MainActivity extends AppCompatActivity implements DevicesSearcher.IDevicesSearch {
+public class MainActivity extends AppCompatActivity implements DevSearcher.IDevicesSearch {
 
     private static final String TAG = "MainActivity";
 
@@ -48,11 +45,11 @@ public class MainActivity extends AppCompatActivity implements DevicesSearcher.I
     @BindView(R.id.ll_bottom)
     LinearLayout mLlBottom;
 
-    private DevicesSearcher mSearcher;
+    private DevSearcher mSearcher;
     private KHandler mKHandler = new KHandler(this);
-    private static final int RECEIVEBEAN = 0x101;
-    private DeviceRvAdapter mDeviceRvAdapter;
-    private boolean needClear = false;
+    private static final int SEARCH_RESULT = 0x101;
+    private DevRvAdapter mDeviceRvAdapter;
+    private boolean mClr = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,12 +63,12 @@ public class MainActivity extends AppCompatActivity implements DevicesSearcher.I
 
     private void initView() {
         mRvDevices.setLayoutManager(new LinearLayoutManager(this));
-        mDeviceRvAdapter = new DeviceRvAdapter();
+        mDeviceRvAdapter = new DevRvAdapter();
         mRvDevices.setAdapter(mDeviceRvAdapter);
     }
 
     private void initComponent() {
-        mSearcher = new DevicesSearcher(searchIp, searchPort, listenPort);
+        mSearcher = new DevSearcher(SEARCH_IP, SEARCH_PORT, LISTEN_PORT);
         mSearcher.setListener(this);
     }
 
@@ -96,14 +93,14 @@ public class MainActivity extends AppCompatActivity implements DevicesSearcher.I
     }
 
     private void searchDevices() {
-        needClear = true;
+        mClr = true;
         mSearcher.search();
     }
 
     @Override
-    public void onReceive(SearchReply reply) {
+    public void onReceive(SearchRlyBean reply) {
         Log.e(TAG, "onReceive: " + reply);
-        mKHandler.obtainMessage(RECEIVEBEAN, reply).sendToTarget();
+        mKHandler.obtainMessage(SEARCH_RESULT, reply).sendToTarget();
     }
 
     private static class KHandler extends Handler {
@@ -117,10 +114,10 @@ public class MainActivity extends AppCompatActivity implements DevicesSearcher.I
         public void handleMessage(Message msg) {
             MainActivity activity = (MainActivity) reference.get();
             switch (msg.what) {
-                case RECEIVEBEAN:
+                case SEARCH_RESULT:
                     if (activity != null) {
-                        activity.mDeviceRvAdapter.addData((SearchReply) msg.obj, activity.needClear);
-                        activity.needClear = false;
+                        activity.mDeviceRvAdapter.addData((SearchRlyBean) msg.obj, activity.mClr);
+                        activity.mClr = false;
                     }
                     break;
             }
