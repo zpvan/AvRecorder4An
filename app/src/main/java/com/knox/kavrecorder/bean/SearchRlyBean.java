@@ -11,12 +11,12 @@ public class SearchRlyBean {
 
     private static final String TAG = "SearchRlyBean";
 
-    public int deviceType;      // byte[4]
-    public int deviceFunction;  // byte[4]
-    public String deviceStatus; // byte[32]
-    public String deviceName;   // byte[64]
-    public String deviceAlias;  // byte[64]
-    public String reserved;     // byte[128]
+    public int deviceType;      // 4byte
+    public int deviceFunction;  // 4byte
+    public String deviceStatus; // 4byte
+    public String deviceName;   // 64byte
+    public String deviceAlias;  // 64byte
+    public String reserved;     // 128byte
     public String serverIp;
 
     @Override

@@ -56,4 +56,26 @@ public class KTypeConversion {
 
         return (index > 0) ? new String(bs, offset, index) : new String("0");
     }
+
+    public static byte[] uint32ToBeBytes(long number) {
+        long temp = number;
+        byte[] b = new byte[4];
+        for (int i = 0; i < b.length; i++) {
+            b[b.length - 1 - i] = new Long(temp & 0xFF).byteValue();
+            temp >>= 8;
+        }
+        return b;
+    }
+
+    public static long beBytes2Uint32(byte[] bs, int offset) {
+        if (bs.length <= offset + 3)
+            return 0;
+
+        long value;
+        value = (long) ((bs[offset] & 0xFF) << 24
+                | ((bs[offset + 1] & 0xFF) << 16)
+                | ((bs[offset + 2] & 0xFF) << 8)
+                | ((bs[offset + 3] & 0xFF)));
+        return value;
+    }
 }

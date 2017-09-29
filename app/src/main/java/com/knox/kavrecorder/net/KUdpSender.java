@@ -32,7 +32,7 @@ public class KUdpSender {
 
         try {
             mSender = new DatagramSocket();
-            Log.e(TAG, "KUdpSender: " + "发送端创建成功 " + ip + ":" + port);
+            Log.e(TAG, "constructor: " + "发送端创建成功 " + ip + ":" + port);
             mIP = InetAddress.getByName(ip);
             mPort = port;
         } catch (SocketException e) {
@@ -55,14 +55,16 @@ public class KUdpSender {
 
         try {
             mSender.send(packet);
-            Log.e(TAG, "createSender: 已经发送数据 " + Arrays.toString(data));
+            //Log.e(TAG, "createSender: 已经发送数据 " + Arrays.toString(data));
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
     public void release() {
-        if (mSender != null)
+        if (mSender != null) {
             mSender.close();
+            Log.e(TAG, "release: Socket");
+        }
     }
 }

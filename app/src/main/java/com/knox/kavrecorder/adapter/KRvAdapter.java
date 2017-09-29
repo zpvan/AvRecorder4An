@@ -61,7 +61,7 @@ public abstract class KRvAdapter<T> extends RecyclerView.Adapter<KRvViewHolder> 
 
     public abstract void onBindViewHolder2(KRvViewHolder holder, int position, T t);
 
-    public void setOnListener(KRvAdapterListener listener) {
+    public void setOnClickListener(KRvAdapterListener listener) {
         mListener = listener;
     }
 }

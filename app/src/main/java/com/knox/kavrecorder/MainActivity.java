@@ -12,19 +12,25 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+
 import com.knox.kavrecorder.adapter.DevRvAdapter;
+import com.knox.kavrecorder.adapter.KRvAdapterListener;
 import com.knox.kavrecorder.bean.SearchRlyBean;
+import com.knox.kavrecorder.net.ClientWrapper;
 import com.knox.kavrecorder.net.DevSearcher;
+
 import java.lang.ref.WeakReference;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
+import static com.knox.kavrecorder.constant.NetInfo.CLIENT_PORT;
 import static com.knox.kavrecorder.constant.NetInfo.LISTEN_PORT;
 import static com.knox.kavrecorder.constant.NetInfo.SEARCH_IP;
 import static com.knox.kavrecorder.constant.NetInfo.SEARCH_PORT;
 
-public class MainActivity extends AppCompatActivity implements DevSearcher.IDevicesSearch {
+public class MainActivity extends AppCompatActivity implements DevSearcher.IDevicesSearch, KRvAdapterListener, ClientWrapper.IClientWrapper {
 
     private static final String TAG = "MainActivity";
 
@@ -46,10 +52,13 @@ public class MainActivity extends AppCompatActivity implements DevSearcher.IDevi
     LinearLayout mLlBottom;
 
     private DevSearcher mSearcher;
+    private ClientWrapper mClientWrapper;
     private KHandler mKHandler = new KHandler(this);
     private static final int SEARCH_RESULT = 0x101;
     private DevRvAdapter mDeviceRvAdapter;
     private boolean mClr = false;
+    private boolean isConnecting;
+    private String mServerIP;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,13 +74,16 @@ public class MainActivity extends AppCompatActivity implements DevSearcher.IDevi
         mRvDevices.setLayoutManager(new LinearLayoutManager(this));
         mDeviceRvAdapter = new DevRvAdapter();
         mRvDevices.setAdapter(mDeviceRvAdapter);
+        mDeviceRvAdapter.setOnClickListener(this);
     }
 
     private void initComponent() {
         mSearcher = new DevSearcher(SEARCH_IP, SEARCH_PORT, LISTEN_PORT);
-        mSearcher.setListener(this);
-    }
+        mSearcher.setOnSrchListener(this);
 
+        mClientWrapper = ClientWrapper.getInstance();
+        mClientWrapper.setOnListener(this);
+    }
 
     @OnClick({R.id.btn_search, R.id.btn_pause, R.id.btn_mute, R.id.btn_present, R.id.btn_setting, R.id.btn_canel})
     public void onViewClicked(View view) {
@@ -88,7 +100,16 @@ public class MainActivity extends AppCompatActivity implements DevSearcher.IDevi
             case R.id.btn_setting:
                 break;
             case R.id.btn_canel:
+                cancelShare();
                 break;
+        }
+    }
+
+    private void cancelShare() {
+        isConnecting = false;
+
+        if (mClientWrapper != null) {
+            mClientWrapper.disconnect();
         }
     }
 
@@ -101,6 +122,34 @@ public class MainActivity extends AppCompatActivity implements DevSearcher.IDevi
     public void onReceive(SearchRlyBean reply) {
         Log.e(TAG, "onReceive: " + reply);
         mKHandler.obtainMessage(SEARCH_RESULT, reply).sendToTarget();
+    }
+
+    @Override
+    public void onKRvClick(View view, int position) {
+        if (!isConnecting) {
+            mServerIP = mDeviceRvAdapter.getData(position).serverIp;
+            mClientWrapper.connect(mServerIP, CLIENT_PORT);
+            isConnecting = true;
+        }
+        else {
+            if (mServerIP != mDeviceRvAdapter.getData(position).serverIp) {
+                cancelShare();
+                mServerIP = mDeviceRvAdapter.getData(position).serverIp;
+                mClientWrapper.connect(mServerIP, CLIENT_PORT);
+                isConnecting = true;
+            }
+        }
+
+    }
+
+    @Override
+    public void onPresent(long port) {
+
+    }
+
+    @Override
+    public void onKickOff() {
+        cancelShare();
     }
 
     private static class KHandler extends Handler {
@@ -129,5 +178,7 @@ public class MainActivity extends AppCompatActivity implements DevSearcher.IDevi
         super.onDestroy();
         if (mSearcher != null)
             mSearcher.release();
+
+        cancelShare();
     }
 }

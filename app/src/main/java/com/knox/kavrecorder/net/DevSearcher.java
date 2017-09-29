@@ -4,6 +4,7 @@ import android.util.Log;
 
 import com.knox.kavrecorder.bean.SearchQryBean;
 import com.knox.kavrecorder.bean.SearchRlyBean;
+import com.knox.kavrecorder.utils.ParseBeanUtil;
 
 import java.lang.ref.WeakReference;
 import java.util.Arrays;
@@ -23,7 +24,7 @@ import static com.knox.kavrecorder.utils.KTypeConversion.leBytes2Int;
 public class DevSearcher implements KUdpReceiver.IReceiver {
 
     private static final String TAG = "DevSearcher";
-    private static final String THREAD_NAME = "DevSrch";
+    private static final String THREAD_NAME = "DSR";
     private KUdpSender mKUdpSender;
     private KUdpReceiver mKUdpReceiver;
     private IDevicesSearch mListener;
@@ -31,11 +32,12 @@ public class DevSearcher implements KUdpReceiver.IReceiver {
 
     public DevSearcher(String ip, int sendPort, int receivePort) {
 
-        if (ip == null || sendPort == 0 || receivePort == 0)
+        if (ip == null || sendPort == 0 || receivePort == 0) {
+            Log.e(TAG, "constructor: err ip: " + ip + ", sendPort: " + sendPort + ", receivePort: " + receivePort);
             return;
+        }
 
         mKUdpSender = new KUdpSender(ip, sendPort);
-
         mKUdpReceiver = new KUdpReceiver(receivePort);
         mKUdpReceiver.setListener(this);
         mKUdpReceiver.AsyncReceive();
@@ -57,26 +59,11 @@ public class DevSearcher implements KUdpReceiver.IReceiver {
         @Override
         public void run() {
             if (mSearcher.get().mKUdpSender != null)
-                mSearcher.get().mKUdpSender.send(mSearcher.get().parseQuery(new SearchQryBean(5, 0)));
+                mSearcher.get().mKUdpSender.send(ParseBeanUtil.parseQuery(new SearchQryBean(5, 0)));
         }
     }
 
-    private byte[] parseQuery(SearchQryBean queryBean) {
-        byte[] data = new byte[8];
-        int validSize = 0;
-
-        byte[] deviceType = int2LeBytes(queryBean.deviceType);
-        byte[] deviceFunc = int2LeBytes(queryBean.deviceFunction);
-
-        System.arraycopy(deviceType, 0, data, validSize, deviceType.length);
-        validSize += deviceType.length;
-        System.arraycopy(deviceFunc, 0, data, validSize, deviceFunc.length);
-        validSize += deviceFunc.length;
-        Log.e(TAG, "parseQuery: " + Arrays.toString(data));
-        return data;
-    }
-
-    public void setListener(IDevicesSearch listener) {
+    public void setOnSrchListener(IDevicesSearch listener) {
         mListener = listener;
     }
 

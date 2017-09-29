@@ -20,7 +20,7 @@ import java.util.Arrays;
 public class KUdpReceiver {
 
     private static final String TAG = "KUdpReceiver";
-
+    private static final String THREAD_NAME = "REV";
     private DatagramSocket mSocket;
     private IReceiver mListener;
     private AsyncTask mRecieveThread = null;
@@ -32,10 +32,10 @@ public class KUdpReceiver {
 
         try {
             mSocket = new DatagramSocket(port);
-            Log.e(TAG, "KUdpReceiver: " + "接收端创建成功");
+            Log.e(TAG, "constructor: " + "接收端创建成功");
         } catch (SocketException e) {
             e.printStackTrace();
-            Log.e(TAG, "KUdpReceiver: " + "接收端创建失败");
+            Log.e(TAG, "constructor: " + "接收端创建失败");
         }
     }
 
@@ -57,6 +57,7 @@ public class KUdpReceiver {
         WeakReference<KUdpReceiver> mReceiver;
 
         public AsyncTask(KUdpReceiver receiver) {
+            super(THREAD_NAME);
             mReceiver = new WeakReference<KUdpReceiver>(receiver);
         }
 
@@ -69,11 +70,12 @@ public class KUdpReceiver {
                 try {
                     if (mReceiver.get().mSocket != null)
                         mReceiver.get().mSocket.receive(packet);
-                    Log.e(TAG, "createReceiver: 接收到的信息是 " + Arrays.toString(packet.getData()));
+                    //Log.e(TAG, "createReceiver: 接收到的信息是 " + Arrays.toString(packet.getData()));
                     if (mReceiver.get().mListener != null && packet.getAddress() != null) {
                         mReceiver.get().mListener.onReceive(packet.getData(), packet.getAddress().getHostAddress());
                     }
                 } catch (InterruptedIOException e) {
+                    Log.e(TAG, Thread.currentThread().getName() + ": InterruptedIOException");
                     e.printStackTrace();
                     break;
                 } catch (IOException e) {
@@ -86,10 +88,13 @@ public class KUdpReceiver {
     public void release() {
         if (mRecieveThread != null) {
             mRecieveThread.interrupt();
+            Log.e(TAG, "release: " + THREAD_NAME + ".interrupt");
             mRecieveThread = null;
         }
 
-        if (mSocket != null)
+        if (mSocket != null) {
             mSocket.close();
+            Log.e(TAG, "release: Socket");
+        }
     }
 }
