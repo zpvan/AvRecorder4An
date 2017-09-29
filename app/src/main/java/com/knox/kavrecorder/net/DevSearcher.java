@@ -23,10 +23,7 @@ import static com.knox.kavrecorder.utils.KTypeConversion.leBytes2Int;
 public class DevSearcher implements KUdpReceiver.IReceiver {
 
     private static final String TAG = "DevSearcher";
-
-    private String mSendIp;
-    private int mSendPort;
-    private int mReceivePort;
+    private static final String THREAD_NAME = "DevSrch";
     private KUdpSender mKUdpSender;
     private KUdpReceiver mKUdpReceiver;
     private IDevicesSearch mListener;
@@ -36,10 +33,6 @@ public class DevSearcher implements KUdpReceiver.IReceiver {
 
         if (ip == null || sendPort == 0 || receivePort == 0)
             return;
-
-        mSendIp = ip;
-        mSendPort = sendPort;
-        mReceivePort = receivePort;
 
         mKUdpSender = new KUdpSender(ip, sendPort);
 
@@ -57,7 +50,7 @@ public class DevSearcher implements KUdpReceiver.IReceiver {
         private WeakReference<DevSearcher> mSearcher;
 
         public AsyncTask(DevSearcher searcher) {
-            super("DevSea");
+            super(THREAD_NAME);
             mSearcher = new WeakReference<DevSearcher>(searcher);
         }
 
