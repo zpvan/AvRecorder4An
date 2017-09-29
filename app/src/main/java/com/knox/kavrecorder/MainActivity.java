@@ -1,6 +1,9 @@
 package com.knox.kavrecorder;
 
 import android.content.Context;
+import android.content.Intent;
+import android.media.projection.MediaProjection;
+import android.media.projection.MediaProjectionManager;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
@@ -12,12 +15,15 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.knox.kavrecorder.adapter.DevRvAdapter;
 import com.knox.kavrecorder.adapter.KRvAdapterListener;
 import com.knox.kavrecorder.bean.SearchRlyBean;
 import com.knox.kavrecorder.net.ClientWrapper;
 import com.knox.kavrecorder.net.DevSearcher;
+import com.knox.kavrecorder.net.StreamWrapper;
+import com.knox.kavrecorder.recorder.VRecorder;
 
 import java.lang.ref.WeakReference;
 
@@ -30,7 +36,7 @@ import static com.knox.kavrecorder.constant.NetInfo.LISTEN_PORT;
 import static com.knox.kavrecorder.constant.NetInfo.SEARCH_IP;
 import static com.knox.kavrecorder.constant.NetInfo.SEARCH_PORT;
 
-public class MainActivity extends AppCompatActivity implements DevSearcher.IDevicesSearch, KRvAdapterListener, ClientWrapper.IClientWrapper {
+public class MainActivity extends AppCompatActivity implements DevSearcher.IDevicesSearch, KRvAdapterListener, ClientWrapper.IClientWrapper, StreamWrapper.IStreamWrapper {
 
     private static final String TAG = "MainActivity";
 
@@ -53,12 +59,16 @@ public class MainActivity extends AppCompatActivity implements DevSearcher.IDevi
 
     private DevSearcher mSearcher;
     private ClientWrapper mClientWrapper;
+    private StreamWrapper mStreamWrapper;
     private KHandler mKHandler = new KHandler(this);
     private static final int SEARCH_RESULT = 0x101;
     private DevRvAdapter mDeviceRvAdapter;
     private boolean mClr = false;
     private boolean isConnecting;
     private String mServerIP;
+    private static final int REQUEST_CODE = 0x001;
+    private MediaProjectionManager mMediaProjectionManager;
+    private VRecorder mRecorder;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -83,6 +93,11 @@ public class MainActivity extends AppCompatActivity implements DevSearcher.IDevi
 
         mClientWrapper = ClientWrapper.getInstance();
         mClientWrapper.setOnListener(this);
+
+        mStreamWrapper = StreamWrapper.getInstance();
+        mStreamWrapper.setOnListener(this);
+
+        mMediaProjectionManager = (MediaProjectionManager) getSystemService(MEDIA_PROJECTION_SERVICE);
     }
 
     @OnClick({R.id.btn_search, R.id.btn_pause, R.id.btn_mute, R.id.btn_present, R.id.btn_setting, R.id.btn_canel})
@@ -102,14 +117,6 @@ public class MainActivity extends AppCompatActivity implements DevSearcher.IDevi
             case R.id.btn_canel:
                 cancelShare();
                 break;
-        }
-    }
-
-    private void cancelShare() {
-        isConnecting = false;
-
-        if (mClientWrapper != null) {
-            mClientWrapper.disconnect();
         }
     }
 
@@ -144,12 +151,74 @@ public class MainActivity extends AppCompatActivity implements DevSearcher.IDevi
 
     @Override
     public void onPresent(long port) {
-
+        if (port <= Integer.MAX_VALUE && port >= 0) {
+            mStreamWrapper.connect(mServerIP, (int) port);
+        } else {
+            Log.e(TAG, "onPresent:  port > Integer.MAX_VALUE, can't create socket");
+        }
     }
 
     @Override
     public void onKickOff() {
         cancelShare();
+    }
+
+    @Override
+    public void onStreamOpened() {
+        Intent captureIntent = mMediaProjectionManager.createScreenCaptureIntent();
+        /**
+         * log中观察到, 不够到100ms, onActivityResult就被call了
+         */
+        startActivityForResult(captureIntent, REQUEST_CODE);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        MediaProjection mediaProjection = mMediaProjectionManager.getMediaProjection(resultCode, data);
+        if (mediaProjection == null) {
+            Log.e(TAG, "media projection is null");
+            return;
+        }
+        // video size
+        final int width = 1280;
+        final int height = 720;
+        final int bitrate = 6 * 1000 * 1000;
+        mRecorder = new VRecorder(width, height, bitrate, 1, mediaProjection, mStreamWrapper);
+        mRecorder.start();
+
+        Toast.makeText(this, "VRecorder is running...", Toast.LENGTH_SHORT).show();
+        /**
+         *  activity退至后台
+         *  重新启动叫起应用, 会按序call onRestart-onStart-onResume
+         */
+        moveTaskToBack(true);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (mSearcher != null)
+            mSearcher.release();
+
+        cancelShare();
+    }
+
+    private void cancelShare() {
+        isConnecting = false;
+
+        if (mRecorder != null) {
+            mRecorder.quit();
+            Toast.makeText(this, "VRecorder stop...", Toast.LENGTH_SHORT).show();
+            mRecorder = null;
+        }
+
+        if (mClientWrapper != null) {
+            mClientWrapper.disconnect();
+        }
+
+        if (mStreamWrapper != null) {
+            mStreamWrapper.disconnect();
+        }
     }
 
     private static class KHandler extends Handler {
@@ -171,14 +240,5 @@ public class MainActivity extends AppCompatActivity implements DevSearcher.IDevi
                     break;
             }
         }
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        if (mSearcher != null)
-            mSearcher.release();
-
-        cancelShare();
     }
 }

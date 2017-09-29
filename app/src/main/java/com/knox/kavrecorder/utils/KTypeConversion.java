@@ -78,4 +78,31 @@ public class KTypeConversion {
                 | ((bs[offset + 3] & 0xFF)));
         return value;
     }
+
+    public static byte[] intTo16bits(int value) {
+        byte[] b = new byte[2];
+        int temp = value;
+        for (int i = 0; i < 2; i++) {
+            b[2 - 1 - i] = new Integer(temp & 0xFF).byteValue();
+            temp >>= 8;
+        }
+        return b;
+    }
+
+    public static byte intTo8bits(int value) {
+        return new Integer(value & 0xFF).byteValue();
+    }
+
+    public static String bytes2Hex1(byte[] buffer){
+        String h = "";
+
+        for(int i = 0; i < buffer.length; i++){
+            String temp = Integer.toHexString(buffer[i] & 0xFF);
+            if(temp.length() == 1){
+                temp = "0" + temp;
+            }
+            h = h + " "+ temp;
+        }
+        return h;
+    }
 }
