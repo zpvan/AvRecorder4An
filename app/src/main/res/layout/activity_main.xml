@@ -72,7 +72,7 @@
             android:layout_gravity="center"
             android:gravity="center"
             android:textColor="#FFFFFF"
-            android:background="@drawable/main_btn_drpdwn_press"/>
+            />
 
         <View
             android:layout_width="0dp"
