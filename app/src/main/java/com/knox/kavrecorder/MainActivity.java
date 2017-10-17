@@ -64,6 +64,8 @@ public class MainActivity extends AppCompatActivity implements DevSearcher.IDevi
     private StreamWrapper mStreamWrapper;
     private KHandler mKHandler = new KHandler(this);
     private static final int SEARCH_RESULT = 0x101;
+    private static final int SEARCH_TIMEOUT = 0x102;
+    private static final int TIMEOUT_MS = 5 * 1000;
     private DevRvAdapter mDeviceRvAdapter;
     private boolean mClr = false;
     private boolean isConnecting;
@@ -103,6 +105,7 @@ public class MainActivity extends AppCompatActivity implements DevSearcher.IDevi
                     //更新完毕后注意设置刷新完成 mRecyclerView.refreshComplete();
                     isRefreshing = true;
                     searchDevices();
+                    MainActivity.this.mKHandler.sendEmptyMessageDelayed(MainActivity.SEARCH_TIMEOUT, TIMEOUT_MS);
                 }
             }
 
@@ -274,12 +277,21 @@ public class MainActivity extends AppCompatActivity implements DevSearcher.IDevi
             switch (msg.what) {
                 case SEARCH_RESULT:
                     if (activity.isRefreshing) {
+                        activity.mKHandler.removeMessages(MainActivity.SEARCH_TIMEOUT);
                         activity.mRvDevices.refreshComplete();
                         activity.isRefreshing = false;
                     }
                     if (activity != null) {
                         activity.mDeviceRvAdapter.addData((SearchRlyBean) msg.obj, activity.mClr);
                         activity.mClr = false;
+                    }
+                    break;
+
+                case SEARCH_TIMEOUT:
+                    if (activity.isRefreshing) {
+                        Toast.makeText(activity, "search timeout", Toast.LENGTH_SHORT).show();
+                        activity.mRvDevices.refreshComplete();
+                        activity.isRefreshing = false;
                     }
                     break;
             }
