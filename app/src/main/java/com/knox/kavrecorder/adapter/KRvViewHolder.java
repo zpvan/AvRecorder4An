@@ -3,6 +3,7 @@ package com.knox.kavrecorder.adapter;
 import android.support.v7.widget.RecyclerView;
 import android.util.SparseArray;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 
@@ -27,6 +28,13 @@ public class KRvViewHolder extends RecyclerView.ViewHolder {
         View textView = findView(vId);
         if (textView instanceof TextView) {
             ((TextView) textView).setText(text);
+        }
+    }
+
+    public void setImgVisibility(int vId, boolean isVisible) {
+        View imageView = findView(vId);
+        if (imageView instanceof ImageView) {
+            ((ImageView) imageView).setVisibility(isVisible ? View.VISIBLE : View.INVISIBLE);
         }
     }
 

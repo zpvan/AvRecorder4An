@@ -19,10 +19,13 @@ public class DevRvAdapter extends KRvAdapter<SearchRlyBean> {
     @Override
     public void onBindViewHolder2(KRvViewHolder holder, int position, SearchRlyBean searchReply) {
         holder.setText(R.id.tv_name, searchReply.deviceName);
+        holder.setImgVisibility(R.id.iv_check, searchReply.isVisible);
     }
 
     @Override
     public KRvViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         return new KRvViewHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.item_devices, null, false));
     }
+
+
 }

@@ -7,23 +7,49 @@
     android:orientation="vertical"
     tools:context="com.knox.kavrecorder.MainActivity">
 
-    <android.support.v7.widget.RecyclerView
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="2"
+        android:background="#8d8d8d">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentLeft="true"
+            android:layout_marginBottom="30dp"
+            android:layout_marginLeft="20dp"
+            android:text="IPES1000"
+            android:textColor="@color/textWhite"
+            android:textSize="20sp"
+            android:textStyle="bold"/>
+    </RelativeLayout>
+
+    <!--<android.support.v7.widget.RecyclerView
         android:id="@+id/rv_devices"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1" />
+        android:layout_weight="3" />-->
+
+    <com.jcodecraeer.xrecyclerview.XRecyclerView
+        android:id="@+id/rv_devices"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="3" />
 
     <LinearLayout
         android:id="@+id/ll_bottom"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="#8d8d8d"
         android:orientation="horizontal"
-        android:background="#8d8d8d">
+        android:visibility="gone">
 
         <View
             android:layout_width="0dp"
-            android:layout_weight="1"
-            android:layout_height="1dp"/>
+            android:layout_height="1dp"
+            android:layout_weight="1" />
 
         <ImageView
             android:id="@+id/btn_search"
@@ -61,25 +87,22 @@
 
         <View
             android:layout_width="0dp"
-            android:layout_weight="1"
-            android:layout_height="1dp"/>
+            android:layout_height="1dp"
+            android:layout_weight="1" />
 
         <TextView
             android:id="@+id/btn_canel"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="取消分享"
             android:layout_gravity="center"
             android:gravity="center"
-            android:textColor="#FFFFFF"
-            />
+            android:text="取消分享"
+            android:textColor="#FFFFFF" />
 
         <View
             android:layout_width="0dp"
-            android:layout_weight="1"
-            android:layout_height="1dp"/>
-
-
+            android:layout_height="1dp"
+            android:layout_weight="1" />
     </LinearLayout>
 
 </LinearLayout>

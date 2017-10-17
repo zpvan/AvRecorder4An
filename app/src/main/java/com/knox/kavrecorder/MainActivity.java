@@ -17,6 +17,8 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.jcodecraeer.xrecyclerview.ProgressStyle;
+import com.jcodecraeer.xrecyclerview.XRecyclerView;
 import com.knox.kavrecorder.adapter.DevRvAdapter;
 import com.knox.kavrecorder.adapter.KRvAdapterListener;
 import com.knox.kavrecorder.bean.SearchRlyBean;
@@ -41,7 +43,7 @@ public class MainActivity extends AppCompatActivity implements DevSearcher.IDevi
     private static final String TAG = "MainActivity";
 
     @BindView(R.id.rv_devices)
-    RecyclerView mRvDevices;
+    XRecyclerView mRvDevices;
     @BindView(R.id.btn_search)
     ImageView mBtnSearch;
     @BindView(R.id.btn_pause)
@@ -69,6 +71,7 @@ public class MainActivity extends AppCompatActivity implements DevSearcher.IDevi
     private static final int REQUEST_CODE = 0x001;
     private MediaProjectionManager mMediaProjectionManager;
     private VRecorder mRecorder;
+    private boolean isRefreshing;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -84,7 +87,30 @@ public class MainActivity extends AppCompatActivity implements DevSearcher.IDevi
         mRvDevices.setLayoutManager(new LinearLayoutManager(this));
         mDeviceRvAdapter = new DevRvAdapter();
         mRvDevices.setAdapter(mDeviceRvAdapter);
+        mRvDevices.setRefreshProgressStyle(ProgressStyle.LineScaleParty);
         mDeviceRvAdapter.setOnClickListener(this);
+        mRvDevices.setLoadingListener(new XRecyclerView.LoadingListener() {
+            @Override
+            public void onRefresh() {
+                if (isConnecting) {
+                    Toast.makeText(MainActivity.this, "plz disconnect tv first", Toast.LENGTH_SHORT).show();
+                    mRvDevices.refreshComplete();
+                    return;
+                }
+                if (!isRefreshing) {
+                    //refresh data here
+                    //更新完毕后注意设置刷新完成 mRecyclerView.refreshComplete();
+                    isRefreshing = true;
+                    searchDevices();
+                }
+            }
+
+            @Override
+
+            public void onLoadMore() {
+
+            }
+        });
     }
 
     private void initComponent() {
@@ -133,6 +159,13 @@ public class MainActivity extends AppCompatActivity implements DevSearcher.IDevi
 
     @Override
     public void onKRvClick(View view, int position) {
+        Log.e(TAG, "onKRvClick: " + position);
+        // change UI for check
+        for (int i = 0; i < mDeviceRvAdapter.getItemCount(); i++) {
+            mDeviceRvAdapter.getData(position).isVisible = i == position ? true : false;
+        }
+
+
         if (!isConnecting) {
             mServerIP = mDeviceRvAdapter.getData(position).serverIp;
             mClientWrapper.connect(mServerIP, CLIENT_PORT);
@@ -140,12 +173,18 @@ public class MainActivity extends AppCompatActivity implements DevSearcher.IDevi
         }
         else {
             if (mServerIP != mDeviceRvAdapter.getData(position).serverIp) {
+                // choose different device
                 cancelShare();
                 mServerIP = mDeviceRvAdapter.getData(position).serverIp;
                 mClientWrapper.connect(mServerIP, CLIENT_PORT);
                 isConnecting = true;
+            } else {
+                // choose the same device means cancel
+                cancelShare();
+                mDeviceRvAdapter.getData(position).isVisible = false;
             }
         }
+        mDeviceRvAdapter.notifyDataSetChanged();
 
     }
 
@@ -233,6 +272,10 @@ public class MainActivity extends AppCompatActivity implements DevSearcher.IDevi
             MainActivity activity = (MainActivity) reference.get();
             switch (msg.what) {
                 case SEARCH_RESULT:
+                    if (activity.isRefreshing) {
+                        activity.mRvDevices.refreshComplete();
+                        activity.isRefreshing = false;
+                    }
                     if (activity != null) {
                         activity.mDeviceRvAdapter.addData((SearchRlyBean) msg.obj, activity.mClr);
                         activity.mClr = false;

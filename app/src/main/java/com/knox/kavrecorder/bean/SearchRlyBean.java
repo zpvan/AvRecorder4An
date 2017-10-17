@@ -19,6 +19,8 @@ public class SearchRlyBean {
     public String reserved;     // 128byte
     public String serverIp;
 
+    public boolean isVisible = false;
+
     @Override
     public String toString() {
         return "SearchRlyBean{" +
