@@ -88,6 +88,7 @@ public class MainActivity extends AppCompatActivity implements DevSearcher.IDevi
         mDeviceRvAdapter = new DevRvAdapter();
         mRvDevices.setAdapter(mDeviceRvAdapter);
         mRvDevices.setRefreshProgressStyle(ProgressStyle.LineScaleParty);
+        mRvDevices.setLoadingMoreEnabled(false);
         mDeviceRvAdapter.setOnClickListener(this);
         mRvDevices.setLoadingListener(new XRecyclerView.LoadingListener() {
             @Override
