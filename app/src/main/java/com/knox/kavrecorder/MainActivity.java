@@ -238,6 +238,12 @@ public class MainActivity extends AppCompatActivity implements DevSearcher.IDevi
     }
 
     @Override
+    protected void onStart() {
+        super.onStart();
+        Toast.makeText(this, "pull down to refresh", Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
     protected void onDestroy() {
         super.onDestroy();
         if (mSearcher != null)

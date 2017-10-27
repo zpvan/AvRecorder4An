@@ -10,7 +10,7 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="2"
+        android:layout_weight="1"
         android:background="#8d8d8d">
 
         <TextView
@@ -22,7 +22,7 @@
             android:layout_marginLeft="20dp"
             android:text="IPES1000"
             android:textColor="@color/textWhite"
-            android:textSize="20sp"
+            android:textSize="23sp"
             android:textStyle="bold"/>
     </RelativeLayout>
 
